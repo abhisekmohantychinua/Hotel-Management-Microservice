@@ -1,5 +1,18 @@
 .idea
 !/.idea/**
+
+# Ignore files inside .idea directory
+.HotelService/.idea/
+.RatingService/.idea/
+.ServiceRegistry/.idea/
+.UserService/.idea/
+
+# Ignore build directories
+.HotelService/build/
+.RatingService/build/
+.ServiceRegistry/build/
+.UserService/build/
+
 ### STS ###
 .apt_generated
 .classpath
