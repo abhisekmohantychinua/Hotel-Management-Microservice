@@ -1,0 +1,17 @@
+spring:
+  data:
+    mongodb:
+      database: RatingDB
+      host: localhost
+      port: 27017
+  application:
+    name: RATING-SERVICE
+server:
+  port: 8083
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
