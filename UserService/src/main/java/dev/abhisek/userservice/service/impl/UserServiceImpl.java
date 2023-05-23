@@ -4,6 +4,7 @@ import dev.abhisek.userservice.entities.Hotel;
 import dev.abhisek.userservice.entities.Rating;
 import dev.abhisek.userservice.entities.User;
 import dev.abhisek.userservice.exception.ResourceNotFoundException;
+import dev.abhisek.userservice.external.services.HotelServices;
 import dev.abhisek.userservice.repository.UserRepository;
 import dev.abhisek.userservice.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import java.util.UUID;
 public class UserServiceImpl implements UserService {
     private final UserRepository repository;
     private final RestTemplate restTemplate;
+    private final HotelServices hotelServices;
 
     @Override
     public User createUser(User user) {
@@ -47,9 +49,8 @@ public class UserServiceImpl implements UserService {
                 ).toList();
         //extracting the Hotel from Hotel-service
         ratings = ratings.stream().peek(rating -> rating
-                .setHotel(restTemplate
-                        .getForObject("http://HOTEL-SERVICE/hotel/" + rating.getHotelId()
-                                , Hotel.class)
+                .setHotel(hotelServices
+                        .getHOtel(rating.getHotelId())
                 )).toList();
         user.setRatings(ratings);
 
