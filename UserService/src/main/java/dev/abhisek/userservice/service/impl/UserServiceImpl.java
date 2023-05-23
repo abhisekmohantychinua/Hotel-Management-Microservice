@@ -1,27 +1,25 @@
 package dev.abhisek.userservice.service.impl;
 
-import dev.abhisek.userservice.entities.Hotel;
 import dev.abhisek.userservice.entities.Rating;
 import dev.abhisek.userservice.entities.User;
 import dev.abhisek.userservice.exception.ResourceNotFoundException;
 import dev.abhisek.userservice.external.services.HotelServices;
+import dev.abhisek.userservice.external.services.RatingServices;
 import dev.abhisek.userservice.repository.UserRepository;
 import dev.abhisek.userservice.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository repository;
-    private final RestTemplate restTemplate;
+    //    private final RestTemplate restTemplate;
     private final HotelServices hotelServices;
+    private final RatingServices ratingServices;
 
     @Override
     public User createUser(User user) {
@@ -36,21 +34,22 @@ public class UserServiceImpl implements UserService {
         );
 
         //extracting the ratings from Rating-service
-        var ratings = Arrays
-                .stream(
-                        Objects
-                                .requireNonNull(
-                                        restTemplate
-                                                .getForObject(
-                                                        "http://RATING-SERVICE/rating/user/" + user.getUserId()
-                                                        , Rating[].class
-                                                )
-                                )
-                ).toList();
+//        var ratings = Arrays
+//                .stream(
+//                        Objects
+//                                .requireNonNull(
+//                                        restTemplate
+//                                                .getForObject(
+//                                                        "http://RATING-SERVICE/rating/user/" + user.getUserId()
+//                                                        , Rating[].class
+//                                                )
+//                                )
+//                ).toList();
+        List<Rating> ratings = ratingServices.getRatingsByUserId(user.getUserId());
         //extracting the Hotel from Hotel-service
         ratings = ratings.stream().peek(rating -> rating
                 .setHotel(hotelServices
-                        .getHOtel(rating.getHotelId())
+                        .getHotel(rating.getHotelId())
                 )).toList();
         user.setRatings(ratings);
 
@@ -63,23 +62,31 @@ public class UserServiceImpl implements UserService {
         List<User> users = repository.findAll();
         users = users.stream().peek(user -> {
             //extracting the ratings from Rating-service
-            var ratings = Arrays
-                    .stream(
-                            Objects
-                                    .requireNonNull(
-                                            restTemplate
-                                                    .getForObject(
-                                                            "http://RATING-SERVICE/rating/user/" + user.getUserId()
-                                                            , Rating[].class
-                                                    )
-                                    )
-                    ).toList();
+//            var ratings = Arrays
+//                    .stream(
+//                            Objects
+//                                    .requireNonNull(
+//                                            restTemplate
+//                                                    .getForObject(
+//                                                            "http://RATING-SERVICE/rating/user/" + user.getUserId()
+//                                                            , Rating[].class
+//                                                    )
+//                                    )
+//                    ).toList();
+//      Dropped idea to get rating by using restTemplate because it is boring and I have not created configuration for restTemplate interceptor
+
+
             //extracting the Hotel from Hotel-service
-            ratings = ratings.stream().peek(rating -> rating
-                    .setHotel(restTemplate
-                            .getForObject("http://HOTEL-SERVICE/hotel/" + rating.getHotelId()
-                                    , Hotel.class)
-                    )).toList();
+            List<Rating> ratings = ratingServices.getRatingsByUserId(user.getUserId());
+            //extracting the Hotel from Hotel-service
+            ratings = ratings
+                    .stream()
+                    .peek(rating -> {
+                        rating
+                                .setHotel(hotelServices
+                                        .getHotel(rating.getHotelId()));
+
+                    }).toList();
             user.setRatings(ratings);
 
         }).toList();

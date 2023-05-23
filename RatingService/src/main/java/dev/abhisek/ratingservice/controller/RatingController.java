@@ -4,6 +4,7 @@ import dev.abhisek.ratingservice.entity.Rating;
 import dev.abhisek.ratingservice.services.RatingServices;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +16,7 @@ import java.util.List;
 public class RatingController {
     private final RatingServices services;
 
+    @PreAuthorize("hasAuthority('Admin')")
     @PostMapping
     public ResponseEntity<Rating> createRating(@RequestBody Rating rating) {
         return ResponseEntity
@@ -31,6 +33,7 @@ public class RatingController {
                 );
     }
 
+    @PreAuthorize("hasAuthority('SCOPE_internal') || hasAuthority('Admin')")
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Rating>> getRatingsByUserId(@PathVariable String userId) {
         return ResponseEntity
